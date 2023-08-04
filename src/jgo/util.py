@@ -26,11 +26,9 @@ def add_jvm_args_as_necessary(argv, gc_option="-XX:+UseConcMarkSweepGC"):
     total_memory = psutil.virtual_memory().total
     exponent = 3 if total_memory > 2 * 1024**3 else 2
     memory_unit = "G" if exponent == 3 else "M"
-    max_heap_size = "{}{}".format(
-        max(total_memory // (1024**exponent) // 2, 1), memory_unit
-    )
+    max_heap_size = f"{max(total_memory // 1024**exponent // 2, 1)}{memory_unit}"
 
-    argv = ["-Xmx{}".format(max_heap_size)] + argv
+    argv = [f"-Xmx{max_heap_size}"] + argv
 
     return argv
 
@@ -76,16 +74,14 @@ def main_from_endpoint(
     jgo_and_jvm_argv = ([] if double_dash_index < 0 else argv[:double_dash_index]) + [
         "--ignore-jgorc"
     ]
-    repository_strings = ["-r"] + [
-        "{}={}".format(k, v) for (k, v) in repositories.items()
-    ]
+    repository_strings = (["-r"] + [f"{k}={v}" for (k, v) in repositories.items()])
     primary_endpoint = (
-        primary_endpoint + ":{}".format(primary_endpoint_version)
+        f"{primary_endpoint}:{primary_endpoint_version}"
         if primary_endpoint_version
         else primary_endpoint
     )
     primary_endpoint = (
-        primary_endpoint + ":{}".format(primary_endpoint_main_class)
+        f"{primary_endpoint}:{primary_endpoint_main_class}"
         if primary_endpoint_main_class
         else primary_endpoint
     )

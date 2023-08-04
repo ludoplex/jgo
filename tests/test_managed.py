@@ -14,11 +14,7 @@ _logger.level = logging.INFO
 
 SJC_VERSION = "2.87.0"
 SJC_OPTIONAL_VERSION = "1.0.0"
-MANAGED_ENDPOINT = (
-    "org.scijava:scijava-common:{}+org.scijava:scijava-optional:MANAGED".format(
-        SJC_VERSION
-    )
-)
+MANAGED_ENDPOINT = f"org.scijava:scijava-common:{SJC_VERSION}+org.scijava:scijava-optional:MANAGED"
 MANAGED_PRIMARY_ENDPOINT = "org.scijava:scijava-common:MANAGED"
 REPOSITORIES = {"scijava.public": "https://maven.scijava.org/content/groups/public"}
 
@@ -54,14 +50,14 @@ class ManagedDependencyTest(unittest.TestCase):
             sj_common_jar = find_jar_matching(jars, "scijava-common")
             self.assertEqual(
                 sj_common_jar,
-                os.path.join(workspace, "scijava-common-%s.jar" % SJC_VERSION),
+                os.path.join(workspace, f"scijava-common-{SJC_VERSION}.jar"),
                 "Expected scijava-common jar",
             )
             sj_optional_jar = find_jar_matching(jars, "scijava-optional")
             self.assertEqual(
                 sj_optional_jar,
                 os.path.join(
-                    workspace, "scijava-optional-%s.jar" % SJC_OPTIONAL_VERSION
+                    workspace, f"scijava-optional-{SJC_OPTIONAL_VERSION}.jar"
                 ),
                 "Expected scijava-optional jar",
             )
