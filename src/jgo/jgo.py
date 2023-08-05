@@ -36,7 +36,7 @@ def classpath_separator():
 class NoMainClassInManifest(Exception):
     def __init__(self, jar):
         super(NoMainClassInManifest, self).__init__(
-            "{} manifest does not specify Main-Class".format(jar)
+            f"{jar} manifest does not specify Main-Class"
         )
         self.jar = jar
 
@@ -44,37 +44,33 @@ class NoMainClassInManifest(Exception):
 class ExecutableNotFound(Exception):
     def __init__(self, executable, path):
         super(ExecutableNotFound, self).__init__(
-            "{} not found on path {}".format(executable, path)
+            f"{executable} not found on path {path}"
         )
 
 
 class InvalidEndpoint(Exception):
     def __init__(self, endpoint, reason):
-        super(InvalidEndpoint, self).__init__(
-            "Invalid endpoint {}: {}".format(endpoint, reason)
-        )
+        super(InvalidEndpoint, self).__init__(f"Invalid endpoint {endpoint}: {reason}")
         self.endpoint = endpoint
         self.reason = reason
 
 
 class UnableToAutoComplete(Exception):
     def __init__(self, clazz):
-        super(UnableToAutoComplete, self).__init__(
-            "Unable to auto-complete {}".format(clazz)
-        )
+        super(UnableToAutoComplete, self).__init__(f"Unable to auto-complete {clazz}")
         self.clazz = clazz
 
 
 class HelpRequested(Exception):
     def __init__(self, argv):
-        super(HelpRequested, self).__init__("Help requested {}".format(argv))
+        super(HelpRequested, self).__init__(f"Help requested {argv}")
         self.argv = argv
 
 
 class NoEndpointProvided(Exception):
     def __init__(self, argv):
         super(NoEndpointProvided, self).__init__(
-            "No endpoint found in provided arguments: {}".format(argv)
+            f"No endpoint found in provided arguments: {argv}"
         )
         self.argv = argv
 
@@ -131,7 +127,7 @@ class Endpoint:
         if self.version != Endpoint.VERSION_MANAGED:
             xml += "<version>{version}</version>".format(version=self.version)
         if self.classifier:
-            xml = xml + "<classifier>{classifier}</classifier>".format(
+            xml += "<classifier>{classifier}</classifier>".format(
                 classifier=self.classifier
             )
         return xml
@@ -143,42 +139,34 @@ class Endpoint:
             + ([self.classifier] if self.classifier else [])
         )
 
-    def is_endpoint(string):
+    def is_endpoint(self):
         endpoint_elements = (
-            string.split("+")[0].split(":") if "+" in string else string.split(":")
+            self.split("+")[0].split(":") if "+" in self else self.split(":")
         )
 
-        if (
-            len(endpoint_elements) < 2
-            or len(endpoint_elements) > 5
-            or endpoint_elements[0].startswith("-")
-        ):
-            return False
+        return (
+            len(endpoint_elements) >= 2
+            and len(endpoint_elements) <= 5
+            and not endpoint_elements[0].startswith("-")
+        )
 
-        return True
-
-    def parse_endpoint(endpoint):
+    def parse_endpoint(self):
         # G:A:V:C:mainClass
-        endpoint_elements = endpoint.split(":")
+        endpoint_elements = self.split(":")
         endpoint_elements_count = len(endpoint_elements)
 
         if endpoint_elements_count > 5:
-            raise InvalidEndpoint(endpoint, "Too many elements.")
+            raise InvalidEndpoint(self, "Too many elements.")
 
         if endpoint_elements_count < 2:
-            raise InvalidEndpoint(endpoint, "Not enough artifacts specified.")
+            raise InvalidEndpoint(self, "Not enough artifacts specified.")
 
         if endpoint_elements_count == 4:
             return Endpoint(*endpoint_elements[:3], main_class=endpoint_elements[3])
 
         if endpoint_elements_count == 3:
             if re.match(
-                "({})|({})|({})|({})".format(
-                    "[0-9a-f].*",
-                    Endpoint.VERSION_RELEASE,
-                    Endpoint.VERSION_LATEST,
-                    Endpoint.VERSION_MANAGED,
-                ),
+                f"([0-9a-f].*)|({Endpoint.VERSION_RELEASE})|({Endpoint.VERSION_LATEST})|({Endpoint.VERSION_MANAGED})",
                 endpoint_elements[2],
             ):
                 return Endpoint(*endpoint_elements[:2], version=endpoint_elements[2])
@@ -254,7 +242,7 @@ def launch_java(
 
     cp = classpath_separator().join([os.path.join(jar_dir, "*")] + additional_jars)
     _logger.debug("class path: %s", cp)
-    jvm_args = tuple(arg for arg in jvm_args) if jvm_args else tuple()
+    jvm_args = tuple(jvm_args) if jvm_args else tuple()
     return subprocess.run(
         (java, "-cp", cp) + jvm_args + (main_class,) + app_args,
         stdout=stdout,
@@ -272,11 +260,13 @@ def run_and_combine_outputs(command, *args):
 def find_endpoint(argv, shortcuts={}):
     # endpoint is first positional argument
     pattern = re.compile("(.*https?://.*|[a-zA-Z]:\\.*)")
-    indices = []
-    for index, arg in enumerate(argv):
-        if arg in shortcuts or (Endpoint.is_endpoint(arg) and not pattern.match(arg)):
-            indices.append(index)
-    return -1 if len(indices) == 0 else indices[-1]
+    indices = [
+        index
+        for index, arg in enumerate(argv)
+        if arg in shortcuts
+        or (Endpoint.is_endpoint(arg) and not pattern.match(arg))
+    ]
+    return -1 if not indices else indices[-1]
 
 
 _default_log_levels = (
@@ -387,9 +377,9 @@ and it will be auto-completed.
 
 
 def _jgo_main(argv=sys.argv[1:], stdout=None, stderr=None):
-    LOG_FORMAT = "%(levelname)s %(asctime)s: %(message)s"
+    if "-q" not in argv and "--quiet" not in argv:
+        LOG_FORMAT = "%(levelname)s %(asctime)s: %(message)s"
 
-    if not ("-q" in argv or "--quiet" in argv):
         logging.basicConfig(
             level=logging.INFO,
             # datefmt = '%Y-%m-%d -  %H:%M:%S',
@@ -469,7 +459,7 @@ def autocomplete_main_class(main_class, artifactId, workspace):
     args = ("tf",)
 
     if main_class[0] == "@":
-        format_str = ".*{}\\.class".format(main_class[1:])
+        format_str = f".*{main_class[1:]}\\.class"
         pattern = re.compile(format_str)
         relevant_jars = [
             jar
@@ -489,7 +479,7 @@ def autocomplete_main_class(main_class, artifactId, workspace):
 
 def split_endpoint_string(endpoint_string):
     endpoint_strings = endpoint_string.split("+")
-    endpoint_strings = endpoint_strings[0:1] + sorted(endpoint_strings[1:])
+    endpoint_strings = endpoint_strings[:1] + sorted(endpoint_strings[1:])
     return endpoint_strings
 
 
@@ -507,9 +497,7 @@ def coordinates_from_endpoints(endpoints):
 def workspace_dir_from_coordinates(coordinates, cache_dir):
     coord_string = "+".join(["-".join(c) for c in coordinates])
     hash_path = hashlib.sha256(coord_string.encode("utf-8")).hexdigest()
-    workspace = os.path.join(cache_dir, *coordinates[0], hash_path)
-
-    return workspace
+    return os.path.join(cache_dir, *coordinates[0], hash_path)
 
 
 def workspace_dir_from_endpoint_strings(
@@ -542,7 +530,8 @@ def resolve_dependencies(
     endpoints = endpoints_from_strings(endpoint_strings, shortcuts=shortcuts)
     primary_endpoint = endpoints[0]
     deps = "".join(
-        "<dependency>{}</dependency>".format(ep.dependency_string()) for ep in endpoints
+        f"<dependency>{ep.dependency_string()}</dependency>"
+        for ep in endpoints
     )
     repo_str = "".join(
         "<repository><id>{rid}</id><url>{url}</url></repository>".format(rid=k, url=v)
@@ -685,21 +674,21 @@ def resolve_dependencies(
             if split_line_len < 5 and split_line_len > 6:
                 continue
 
-            if split_line_len == 6:
-                # G:A:P:C:V:S
-                (g, a, extension, c, version, scope) = split_line
-            elif split_line_len == 5:
+            if split_line_len == 5:
                 # G:A:P:V:S
                 (g, a, extension, version, scope) = split_line
                 c = None
 
+            elif split_line_len == 6:
+                # G:A:P:C:V:S
+                (g, a, extension, c, version, scope) = split_line
             # NB: test-jar packaging means jar packaging + tests classifier.
             if extension == "test-jar":
                 extension = "jar"
                 c = "tests"
 
             artifact_name = "-".join((a, version, c) if c else (a, version))
-            jar_file = "{}.{}".format(artifact_name, extension)
+            jar_file = f"{artifact_name}.{extension}"
             jar_file_in_workspace = os.path.join(workspace, jar_file)
 
             relevant_jars.append(jar_file_in_workspace)

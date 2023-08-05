@@ -282,9 +282,7 @@ class TestRun(unittest.TestCase):
         self.assertIsNone(stdout)
         self.assertIsNone(stderr)
 
-        with open("{}/{}".format(workspace, "coordinates.txt")) as fh:
-            coordinates = fh.read()
-
+        coordinates = pathlib.Path(f"{workspace}/coordinates.txt").read_text()
         self.assertIn("io.netty:netty-transport-native-epoll", coordinates)
         self.assertIn("org.clojure:clojure", coordinates)
 
@@ -323,9 +321,7 @@ class TestRun(unittest.TestCase):
         self.assertIsNone(stdout)
         self.assertIsNone(stderr)
 
-        with open("{}/{}".format(workspace, "coordinates.txt")) as fh:
-            coordinates = fh.read()
-
+        coordinates = pathlib.Path(f"{workspace}/coordinates.txt").read_text()
         self.assertIn("io.netty:netty-transport-native-epoll", coordinates)
         self.assertIn("org.clojure:clojure", coordinates)
 
@@ -448,9 +444,7 @@ class TestUtil(unittest.TestCase):
         self.assertIsNone(stdout)
         self.assertIsNone(stderr)
 
-        with open("{}/{}".format(workspace, "coordinates.txt")) as fh:
-            coordinates = fh.read()
-
+        coordinates = pathlib.Path(f"{workspace}/coordinates.txt").read_text()
         self.assertIn("org.slf4j:slf4j-simple", coordinates)
 
     @patch("jgo.jgo._run")
@@ -481,9 +475,7 @@ class TestUtil(unittest.TestCase):
         self.assertIsNone(stdout)
         self.assertIsNone(stderr)
 
-        with open("{}/{}".format(workspace, "coordinates.txt")) as fh:
-            coordinates = fh.read()
-
+        coordinates = pathlib.Path(f"{workspace}/coordinates.txt").read_text()
         self.assertIn("org.slf4j:slf4j-simple", coordinates)
 
 

@@ -15,7 +15,7 @@ _logger = logging.getLogger(__name__)
 IGNORE_JGORC = "--ignore-jgorc"
 LINK_TYPE = "--link-type"
 PARSINGTON_VERSION = "1.0.4"
-PARSINGTON_ENDPOINT = "org.scijava:parsington:{}".format(PARSINGTON_VERSION)
+PARSINGTON_ENDPOINT = f"org.scijava:parsington:{PARSINGTON_VERSION}"
 
 
 def run_parsington(cache_dir, link_type, parsington_args):
@@ -47,7 +47,7 @@ class ParsingtonTest(unittest.TestCase):
             self.assertEqual(len(jars), 1, "Expected exactly one jar in workspace")
             self.assertEqual(
                 jars[0],
-                os.path.join(workspace, "parsington-%s.jar" % PARSINGTON_VERSION),
+                os.path.join(workspace, f"parsington-{PARSINGTON_VERSION}.jar"),
                 "Expected parsington jar",
             )
             self.assertFalse(
@@ -81,7 +81,7 @@ class ParsingtonTest(unittest.TestCase):
             self.assertEqual(len(jars), 1, "Expected exactly one jar in workspace")
             self.assertEqual(
                 jars[0],
-                os.path.join(workspace, "parsington-%s.jar" % PARSINGTON_VERSION),
+                os.path.join(workspace, f"parsington-{PARSINGTON_VERSION}.jar"),
                 "Expected parsington jar",
             )
             self.assertTrue(os.path.islink(jars[0]), "Expected soft link.")
@@ -99,7 +99,7 @@ class ParsingtonTest(unittest.TestCase):
             self.assertEqual(len(jars), 1, "Expected exactly one jar in workspace")
             self.assertEqual(
                 jars[0],
-                os.path.join(workspace, "parsington-%s.jar" % PARSINGTON_VERSION),
+                os.path.join(workspace, f"parsington-{PARSINGTON_VERSION}.jar"),
                 "Expected parsington jar",
             )
             self.assertFalse(
@@ -125,7 +125,7 @@ class ParsingtonTest(unittest.TestCase):
             self.assertEqual(len(jars), 1, "Expected exactly one jar in workspace")
             self.assertEqual(
                 jars[0],
-                os.path.join(workspace, "parsington-%s.jar" % PARSINGTON_VERSION),
+                os.path.join(workspace, f"parsington-{PARSINGTON_VERSION}.jar"),
                 "Expected parsington jar",
             )
         finally:
